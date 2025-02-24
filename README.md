@@ -30,19 +30,29 @@ pnpm install
 ```bash
 cp .env.example .env
 ```
-Tienes que rellenar las variables de entorno, PORT y DATABASE_URL son obligatorias
 
-5. Inicia la base de datos:
+- PORT: Puerto donde correrá el servidor (requerido, usa 3001 por defecto).
+- DATABASE_URL: URL de conexión a PostgreSQL (requerido). Ajusta postgres:123456 si cambiaste el usuario o contraseña en docker-compose.yml.
+> Nota: Estas variables son obligatorias porque el proyecto usa Joi para validación, y fallará si no están definidas.
+
+5. Generar el cliente de Prisma:
+```
+npx prisma generate
+npx prisma migrate dev --name init
+```
+
+6. Inicia la base de datos:
 ```bash
 docker-compose up -d
 ```
 Esto crea una carpeta llamada pgdata en tu directorio actual.
 
-6. Inicia el servidor:
+7. Inicia el servidor:
 ```bash
 nest start --watch
 ```
-7. Detiene la base de datos:
+8. Detiene la base de datos:
 ```bash
 docker-compose down
 ```
+9. Puedes ver la documentación con swagget en la ruta `localhost:tu-port/docs`
