@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Especie de animales: Perro, Gato, Pez, Pajaro, Oso, Caballo, Vaca
+model Species {
+	id          String   @id @default(uuid())
+	name        String   @unique
+	description String?
+	breeds      Breed[]
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
+}
+
+// Raza de animales: Labrador, Sheltie, Pug, etc.
+model Breed {
+	id          String   @id @default(uuid())
+	name        String
+	description String?
+	species     Species  @relation(fields: [speciesId], references: [id])
+	speciesId   String
+	pets        Pet[]
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
+}
+
+model Pet {
+	id           String   @id @default(uuid())
+	name         String
+	username     String  @unique
+	birthdate    DateTime
+	avatar       String?
+	breed        Breed    @relation(fields: [breedId], references: [id])
+	breedId      String
+	size         Size
+	color        String?
+	gender       Gender
+	neutered     Boolean @default(false)
+	vaccinated   Boolean @default(false)
+	sterilized   Boolean @default(false)
+	friends       PetFriend[] @relation("PetFriends")
+  friendOf      PetFriend[] @relation("FriendOf")
+	temperament  String?
+	location     String?
+	description  String?
+
+	// Si fue comprado o adoptado
+	isAdopted    Boolean  @default(false)
+	isBought     Boolean  @default(false)
+	adoptionDate DateTime?
+	boughtDate   DateTime?
+
+	// Si está por vender o adoptar
+	isForSale			Boolean  @default(false)
+	isForAdoption Boolean  @default(false)
+	forSalePrice  Decimal?  @db.Decimal(15, 4)
+	currencyId    String?
+  currency      Currency? @relation("PetCurrency", fields: [currencyId], references: [id])
+	forSaleDate   DateTime?
+	forAdoptionDate DateTime?
+
+	isDeleted    Boolean  @default(false)
+
+	createdAt    DateTime @default(now())
+	updatedAt    DateTime @updatedAt
+}
+
+
+model PetFriend {
+  petId       String
+  friendId    String
+  createdAt   DateTime @default(now())
+	isDeleted		Boolean	@default(false)
+	deletedAt   DateTime?
+
+  pet         Pet      @relation("PetFriends", fields: [petId], references: [id])
+  friend      Pet      @relation("FriendOf", fields: [friendId], references: [id])
+
+	@@index([isDeleted])
+  @@id([petId, friendId])
+}
+
+
+model Currency {
+  id                String    @id @default(uuid())  // ID único para cada moneda
+  code              String    @unique              // Código ISO 4217 de la moneda (ej. "USD", "MXN", "COP")
+  name              String                         // Nombre completo (ej. "US Dollar", "Peso Mexicano")
+  countryCode       String                         // Código del país (ej. "US", "MX", "CO")
+  useFixedDecimals  Boolean   @default(true)       // Si usa decimales fijos (true para USD/MXN, false para COP)
+  decimalPlaces     Int       @default(2)          // Número de decimales a mostrar (2 para USD, 0 para COP)
+  locale            String                         // Formato regional (ej. "en-US", "es-MX", "es-CO")
+  symbol            String?                        // Símbolo de la moneda (ej. "$", "CLP$") - Opcional
+  isActive          Boolean   @default(true)       // Para habilitar/deshabilitar monedas sin borrarlas
+  createdAt         DateTime  @default(now())       // Fecha de creación
+  updatedAt         DateTime  @updatedAt            // Fecha de última actualización
+
+  // Relación con Pet (opcional, si cada Pet tiene una moneda específica)
+  pets              Pet[]     @relation("PetCurrency")
+}
+
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Size {
+  SMALL
+  MEDIUM
+  LARGE
+  EXTRA_LARGE
+}

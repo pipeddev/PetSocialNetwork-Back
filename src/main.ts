@@ -1,11 +1,12 @@
 import {
 	DocumentBuilder,
 	SwaggerModule
-} 									from '@nestjs/swagger';
-import { NestFactory }              from '@nestjs/core';
-import { Logger, ValidationPipe }   from '@nestjs/common';
+} from '@nestjs/swagger';
+import { NestFactory } from '@nestjs/core';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
+import { ENVS } from './config/envs';
 
 
 ( async () => {
@@ -35,6 +36,6 @@ import { AppModule } from './app.module';
 	const document = SwaggerModule.createDocument( app, config );
 	SwaggerModule.setup( 'docs', app, document );
 
-    await app.listen( process.env.PORT ?? 3000 );
-	logger.log( `Application is running on: ${ process.env.HOST_API }:${ process.env.PORT_API }`);
+    await app.listen( +ENVS.PORT );
+	logger.log( `Application is running on localhost:${ ENVS.PORT }`);
 })();
