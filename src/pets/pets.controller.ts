@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	Patch,
+	Param,
+	Delete,
+	ParseUUIDPipe
+} from '@nestjs/common';
 
 import { PetsService }	from '@pets/pets.service';
 import { CreatePetDto } from '@pets/dto/create-pet.dto';
@@ -12,8 +21,10 @@ export class PetsController {
 	) {}
 
 	@Post()
-	create(@Body() createPetDto: CreatePetDto) {
-		return this.petsService.create(createPetDto);
+	create(
+		@Body() createPetDto: CreatePetDto
+	) {
+		return this.petsService.create( createPetDto );
 	}
 
 	@Get()
@@ -22,17 +33,24 @@ export class PetsController {
 	}
 
 	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.petsService.findOne(+id);
+	findOne(
+		@Param( 'id', ParseUUIDPipe ) id: string
+	) {
+		return this.petsService.findOne( id );
 	}
 
 	@Patch(':id')
-	update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto) {
-		return this.petsService.update(+id, updatePetDto);
+	update(
+		@Param('id', ParseUUIDPipe ) id: string,
+		@Body() updatePetDto: UpdatePetDto
+	) {
+		return this.petsService.update( id, updatePetDto );
 	}
 
 	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.petsService.remove(+id);
+	remove(
+		@Param('id', ParseUUIDPipe) id: string
+	) {
+		return this.petsService.remove( id );
 	}
 }

@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 
 export class CreatePetDto {
-@ApiProperty({ description: 'The name of the pet', example: 'Luna' })
+	@ApiProperty({ description: 'The name of the pet', example: 'Luna' })
   @IsString()
   @IsNotEmpty()
   name: string;

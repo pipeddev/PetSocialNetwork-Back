@@ -12,6 +12,7 @@
     "baseUrl": "./",
     "paths": {
         "@pets/*" : ["src/pets/*"],
+        "@species/*" : ["src/species/*"],
         "@auth/*" : ["src/auth/*"],
     },
     "incremental": true,

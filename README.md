@@ -38,7 +38,7 @@ cp .env.example .env
 5. Generar el cliente de Prisma:
 ```
 npx prisma generate
-npx prisma migrate dev --name init
+// npx prisma migrate dev --name init // Opcional cuando creas un nuevo modelo en el schema de prisma
 ```
 
 6. Inicia la base de datos:
@@ -55,4 +55,4 @@ nest start --watch
 ```bash
 docker-compose down
 ```
-9. Puedes ver la documentación con swagget en la ruta `localhost:tu-port/docs`
+9. Puedes ver la documentación con swagger en la ruta `localhost:tu-port/docs`
