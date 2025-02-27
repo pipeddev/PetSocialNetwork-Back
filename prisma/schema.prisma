@@ -26,9 +26,9 @@ model Species {
 // Raza de animales: Labrador, Sheltie, Pug, etc.
 model Breed {
 	id          String   @id @default(uuid())
-	name        String
+	name        String   @unique
 	description String?
-	species     Species  @relation(fields: [speciesId], references: [id])
+	species     Species  @relation(fields: [speciesId], references: [id], onDelete: Cascade)
 	speciesId   String
 	pets        Pet[]
 	createdAt   DateTime @default(now())

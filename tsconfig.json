@@ -11,9 +11,11 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-        "@pets/*" : ["src/pets/*"],
-        "@species/*" : ["src/species/*"],
-        "@auth/*" : ["src/auth/*"],
+			"@pets/*"       : ["src/pets/*"],
+			"@species/*"    : ["src/species/*"],
+			"@auth/*"       : ["src/auth/*"],
+			"@breeds/*"     : ["src/breeds/*"],
+			"@currencies/*" : ["src/currencies/*"]
     },
     "incremental": true,
     "skipLibCheck": true,
