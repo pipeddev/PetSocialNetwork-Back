@@ -15,7 +15,10 @@
 			"@species/*"    : ["src/species/*"],
 			"@auth/*"       : ["src/auth/*"],
 			"@breeds/*"     : ["src/breeds/*"],
-			"@currencies/*" : ["src/currencies/*"]
+			"@currencies/*" : ["src/currencies/*"],
+            "@comments/*"   : ["src/comments/*"],
+            "@humans/*"     : ["src/humans/*"],
+            "@posts/*"      : ["src/posts/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

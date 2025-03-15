@@ -5,9 +5,22 @@ import { PetsModule }       from '@pets/pets.module';
 import { SpeciesModule }    from '@species/species.module';
 import { BreedsModule }    	from '@breeds/breeds.module';
 import { CurrenciesModule } from '@currencies/currencies.module';
+import { HumansModule }     from '@humans/humans.module';
+import { PostsModule }      from '@posts/posts.module';
+import { CommentsModule }   from '@comments/comments.module';
+import { AuthModule }       from '@auth/auth.module';
 
 @Module({
-  imports       : [PetsModule, SpeciesModule, BreedsModule, CurrenciesModule],
+  imports       : [
+		PetsModule,
+		SpeciesModule,
+		BreedsModule,
+		CurrenciesModule,
+		HumansModule,
+		PostsModule,
+		CommentsModule,
+		AuthModule
+	],
   controllers   : [AppController],
   providers     : [],
 })
