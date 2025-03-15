@@ -69,7 +69,7 @@ export class PetsService extends PrismaClient implements OnModuleInit {
 
 	async update(
 		id: string,
-		{ breedId, currencyId, ...rest }: UpdatePetDto
+		{ breedId, currencyId, humanId, ...rest }: UpdatePetDto
 	): Promise<Pet> {
 		const pet = await this.findOne( id );
 
