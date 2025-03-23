@@ -10,7 +10,7 @@ import { Gender } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateHumanDto {
-  @ApiProperty({
+	@ApiProperty({
     example: 'john_doe',
     description: 'The username of the human',
     minLength: 3,

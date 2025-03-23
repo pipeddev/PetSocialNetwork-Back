@@ -16,10 +16,10 @@
 			"@auth/*"       : ["src/auth/*"],
 			"@breeds/*"     : ["src/breeds/*"],
 			"@currencies/*" : ["src/currencies/*"],
-            "@comments/*"   : ["src/comments/*"],
-            "@humans/*"     : ["src/humans/*"],
-            "@posts/*"      : ["src/posts/*"]
-    },
+			"@comments/*"   : ["src/comments/*"],
+			"@humans/*"     : ["src/humans/*"],
+			"@posts/*"      : ["src/posts/*"]
+		},
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,

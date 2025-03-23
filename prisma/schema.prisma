@@ -42,9 +42,6 @@ model Post {
     content     String?
     media_url   String?
 
-    isDeleted   Boolean  @default(false)
-    deletedAt   DateTime?
-
     pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
     petId      String
 

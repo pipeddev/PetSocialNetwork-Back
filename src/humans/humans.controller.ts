@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 
-import { HumansService }	from './humans.service';
-import { CreateHumanDto } from './dto/create-human.dto';
-import { UpdateHumanDto } from './dto/update-human.dto';
+import { HumansService }  from '@humans/humans.service';
+import { CreateHumanDto }	from '@humans/dto/create-human.dto';
+import { UpdateHumanDto } from '@humans/dto/update-human.dto';
 
 @Controller('humans')
 export class HumansController {
@@ -29,4 +29,5 @@ export class HumansController {
 	) {
 		return this.humansService.remove( id );
 	}
+
 }
