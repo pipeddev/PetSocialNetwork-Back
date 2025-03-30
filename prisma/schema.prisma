@@ -5,72 +5,72 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-    provider = "prisma-client-js"
+	provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+	provider = "postgresql"
+	url      = env("DATABASE_URL")
 }
 
 
 model Comment {
-    id          String   @id @default(uuid())
-    content     String
-    isDeleted   Boolean  @default(false)
-    deletedAt   DateTime?
+	id          		String   @id @default(uuid())
+	content     		String
+	isDeleted   		Boolean  @default(false)
+	deletedAt   		DateTime?
 
-    parentComment  Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
-    parentCommentId String?
+	parentComment		Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+	parentCommentId String?
 
-    replies        Comment[] @relation("CommentReplies")
+	replies        	Comment[] @relation("CommentReplies")
 
-    post       Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
-    postId      String?
+	post						Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+	postId     			String?
 
-    pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
-    petId      String
+	pet        			Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+	petId      			String
 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+	createdAt   		DateTime @default(now())
+	updatedAt   		DateTime @updatedAt
+
+	@@index([petId, postId])
 }
 
 
 model Post {
-    id          String   @id @default(uuid())
-    title       String
-    content     String?
-    media_url   String?
+	id          String   @id @default(uuid())
+	title       String
+	content     String?
+	media_url		String?
 
-    pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
-    petId      String
+	pet        	Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+	petId      	String
 
-    comments   Comment[]
+	comments   	Comment[]
 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
 }
 
 
 // El humano solo será para el login, luego tiene que escoger el perfil del mascota que quiera ver
 model Human {
-    id          String   @id @default(uuid())
-    username    String   @unique
-    email       String   @unique
-    password    String
-    name        String
-    lastName    String
-    avatar      String?
-    address     String?
-    phone       String?
-    sex         Gender?
-    pets        Pet[]
+	id          String   @id @default(uuid())
+	username    String   @unique
+	email       String   @unique
+	password    String
+	name        String?
+	avatar      String?
+	address     String?
+	phone       String?
+	sex         Gender?
+	pets        Pet[]
 
-    googleId    String?
-    facebookId  String?
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+	@@index([username, email])
 }
 
 // Especie de animales: Perro, Gato, Pez, Pajaro, Oso, Caballo, Vaca
@@ -96,65 +96,67 @@ model Breed {
 }
 
 model Pet {
-	id           String   @id @default(uuid())
-	name         String
-	username     String  @unique
-	birthdate    DateTime
-	avatar       String?
-	breed        Breed    @relation(fields: [breedId], references: [id])
-	breedId      String
-	size         Size
-	color        String?
-	gender       Gender
-	neutered     Boolean @default(false)
-	vaccinated   Boolean @default(false)
-	sterilized   Boolean @default(false)
-	friends       PetFriend[] @relation("PetFriends")
-	friendOf      PetFriend[] @relation("FriendOf")
-	temperament  String?
-	location     String?
-	description  String?
+	id           	String   @id @default(uuid())
+	name         	String
+	username     	String  @unique
+	birthdate    	DateTime
+	avatar       	String?
+	breed        	Breed    @relation(fields: [breedId], references: [id])
+	breedId      	String
+	size         	Size
+	color        	String?
+	gender       	Gender
+	neutered     	Boolean @default(false)
+	vaccinated   	Boolean @default(false)
+	sterilized   	Boolean @default(false)
+	friends      	PetFriend[] @relation("PetFriends")
+	friendOf			PetFriend[] @relation("FriendOf")
+	temperament  	String?
+	location     	String?
+	description  	String?
 
-    human        Human    @relation(fields: [humanId], references: [id], onDelete: Cascade)
-    humanId      String
+	human        	Human    @relation(fields: [humanId], references: [id], onDelete: Cascade)
+	humanId      	String
 
-    posts        Post[]
-    comments     Comment[]
+	posts        	Post[]
+	comments     	Comment[]
 
 	// Si fue comprado o adoptado
-	isAdopted    Boolean  @default(false)
-	isBought     Boolean  @default(false)
-	adoptionDate DateTime?
-	boughtDate   DateTime?
+	isAdopted    	Boolean  @default(false)
+	isBought     	Boolean  @default(false)
+	adoptionDate 	DateTime?
+	boughtDate   	DateTime?
 
 	// Si está por vender o adoptar
-	isForSale			Boolean  @default(false)
-	isForAdoption Boolean  @default(false)
-	forSalePrice  Decimal?  @db.Decimal(15, 4)
-	currencyId    String?
-	currency      Currency? @relation("PetCurrency", fields: [currencyId], references: [id])
-	forSaleDate   DateTime?
+	isForSale				Boolean  @default(false)
+	isForAdoption 	Boolean  @default(false)
+	forSalePrice  	Decimal?  @db.Decimal(15, 4)
+	currencyId    	String?
+	currency      	Currency? @relation("PetCurrency", fields: [currencyId], references: [id])
+	forSaleDate   	DateTime?
 	forAdoptionDate DateTime?
 
-	isDeleted    Boolean  @default(false)
+	isDeleted    		Boolean  @default(false)
 
-	createdAt    DateTime @default(now())
-	updatedAt    DateTime @updatedAt
+	createdAt    		DateTime @default(now())
+	updatedAt    		DateTime @updatedAt
 }
 
 
 model PetFriend {
-  petId       String
-  friendId    String
-  createdAt   DateTime @default(now())
+	petId       String
+	friendId    String
+	createdAt   DateTime @default(now())
 	isDeleted		Boolean	@default(false)
 	deletedAt   DateTime?
+	isBlocked		Boolean	@default(false)
+	blockedAt   DateTime?
 
-  pet         Pet      @relation("PetFriends", fields: [petId], references: [id])
-  friend      Pet      @relation("FriendOf", fields: [friendId], references: [id])
+	pet        	Pet      @relation("PetFriends", fields: [petId], references: [id])
+	friend      	Pet      @relation("FriendOf", fields: [friendId], references: [id])
 
-	@@index([isDeleted])
-  @@id([petId, friendId])
+	@@index([isDeleted, isBlocked])
+	@@id([petId, friendId])
 }
 
 

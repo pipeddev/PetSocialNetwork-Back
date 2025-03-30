@@ -18,7 +18,8 @@
 			"@currencies/*" : ["src/currencies/*"],
 			"@comments/*"   : ["src/comments/*"],
 			"@humans/*"     : ["src/humans/*"],
-			"@posts/*"      : ["src/posts/*"]
+			"@posts/*"      : ["src/posts/*"],
+			"@config/*"     : ["src/config/*"]
 		},
     "incremental": true,
     "skipLibCheck": true,
