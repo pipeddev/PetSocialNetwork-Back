@@ -4,7 +4,6 @@ import { Human, PrismaClient } from '@prisma/client';
 
 import { CreateHumanDto } from './dto/create-human.dto';
 import { UpdateHumanDto } from './dto/update-human.dto';
-import { HumanDto }				from './dto/human.dto';
 
 @Injectable()
 export class HumansService extends PrismaClient implements OnModuleInit {
@@ -13,10 +12,10 @@ export class HumansService extends PrismaClient implements OnModuleInit {
 		this.$connect();
 	}
 
-	#humanToHumanDto(human: Human): HumanDto {
+	#humanToHumanDto(human: Human): UpdateHumanDto {
 		const { password, ...rest } = human;
 
-		return rest as HumanDto;
+		return rest as UpdateHumanDto;
 	}
 
 	async #validHuman( human: CreateHumanDto | UpdateHumanDto ): Promise<void> {
@@ -29,15 +28,15 @@ export class HumansService extends PrismaClient implements OnModuleInit {
 		if ( existHuman ) throw new BadRequestException( `Human already exists` );
 	}
 
-	async findOne( id: string ): Promise<HumanDto> {
-		const human = await this.human.findUnique({ where: { id } });
+	async findOne( id: string ): Promise<UpdateHumanDto> {
+		const human = await this.human.findUnique({ where: { id }});
 
 		if ( !human ) throw new NotFoundException( `Human not found` );
 
 		return this.#humanToHumanDto( human );
 	}
 
-	async update( id: string, updateHumanDto: UpdateHumanDto ): Promise<HumanDto> {
+	async update( id: string, updateHumanDto: UpdateHumanDto ): Promise<UpdateHumanDto> {
 		await this.findOne( id );
 		await this.#validHuman( updateHumanDto );
 
@@ -49,7 +48,7 @@ export class HumansService extends PrismaClient implements OnModuleInit {
 		return this.#humanToHumanDto( human );
 	}
 
-	async remove( id: string ): Promise<HumanDto> {
+	async remove( id: string ): Promise<UpdateHumanDto> {
 		const human = await this.findOne( id );
 
 		await this.human.delete({ where: { id }});

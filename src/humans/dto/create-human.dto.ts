@@ -1,3 +1,5 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 import {
   IsEmail,
   IsEnum,
@@ -7,7 +9,6 @@ import {
   Length,
 } from 'class-validator';
 import { Gender } from '@prisma/client';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateHumanDto {
 	@ApiProperty({
@@ -51,17 +52,6 @@ export class CreateHumanDto {
   @Length(2, 50)
   name: string;
 
-  @ApiProperty({
-    example: 'Doe',
-    description: 'The last name of the human',
-    minLength: 2,
-    maxLength: 50,
-  })
-  @IsString()
-  @IsNotEmpty()
-  @Length(2, 50)
-  lastName: string;
-
   @ApiPropertyOptional({
     example: 'https://example.com/avatar.jpg',
     description: 'The URL of the human\'s avatar',
@@ -99,19 +89,4 @@ export class CreateHumanDto {
   @IsOptional()
   sex?: Gender;
 
-  @ApiPropertyOptional({
-    example: 'googleId123',
-    description: 'The Google ID of the human (if registered via Google)',
-  })
-  @IsString()
-  @IsOptional()
-  googleId?: string;
-
-  @ApiPropertyOptional({
-    example: 'facebookId123',
-    description: 'The Facebook ID of the human (if registered via Facebook)',
-  })
-  @IsString()
-  @IsOptional()
-  facebookId?: string;
 }
