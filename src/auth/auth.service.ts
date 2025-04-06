@@ -9,10 +9,11 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
-import { HumanDto } from '@humans/dto/human.entity';
 import { SignUpDto } from '@auth/dto/signup.dto';
 import { SignInDto } from '@auth/dto/signin.dto';
-import { HumanResponseDto } from './dto/human-response.dto';
+import { HumanResponseDto } from '@auth/dto/human-response.dto';
+import { HumanDto } from '@humans/dto/human.entity';
+import { HumanAuthDto } from '@humans/dto/user-auth.dto';
 
 @Injectable()
 export class AuthService extends PrismaClient implements OnModuleInit {
@@ -67,11 +68,13 @@ export class AuthService extends PrismaClient implements OnModuleInit {
     };
   }
 
-	async validate( humanId: string ) : Promise<HumanDto> {
+	async validate( humanId: string ) : Promise<HumanAuthDto> {
 		const human = await this.human.findUnique({ where: { id: humanId }});
 
 		if ( !human ) throw new UnauthorizedException( 'Unauthorized human.' );
 
-		return human as HumanDto;
+		const { password, ...rest } = human as HumanDto;
+
+		return rest as HumanAuthDto;
 	}
 }
