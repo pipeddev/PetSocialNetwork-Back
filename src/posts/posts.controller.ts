@@ -6,16 +6,21 @@ import {
 	Patch,
 	Param,
 	Delete,
-	ParseUUIDPipe
+	ParseUUIDPipe,
+	UseGuards
 } from '@nestjs/common';
 
-import { PostsService }		from '@posts/posts.service';
-import { CreatePostDto }	from '@posts/dto/create-post.dto';
-import { UpdatePostDto }	from '@posts/dto/update-post.dto';
+import { AuthGuard } from '@auth/guards/auth.guard';
+import { CurrentHuman } from '@auth/decorators/current-human.decorator';
+import { PostsService }	from '@posts/posts.service';
+import { CreatePostDto } from '@posts/dto/create-post.dto';
+import { UpdatePostDto } from '@posts/dto/update-post.dto';
+import { HumanAuthDto } from '@humans/dto/user-auth.dto';
 
+@UseGuards( AuthGuard )
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor( private readonly postsService: PostsService ) {}
 
   @Post()
   create(
@@ -25,13 +30,26 @@ export class PostsController {
     return this.postsService.create( petId, createPostDto );
   }
 
-  @Get()
-  findAll() {
-    return this.postsService.findAll();
+  @Get('by-pet/:petId')
+  findAllByPet(
+		@CurrentHuman() human: HumanAuthDto,
+		@Param( 'petId', ParseUUIDPipe ) petId: string,
+	) {
+    return this.postsService.findAllByPet( human, petId );
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+	@Get('index/:petId')
+  findAllIndex(
+		@CurrentHuman() human: HumanAuthDto,
+		@Param( 'petId', ParseUUIDPipe ) petId: string,
+	) {
+    return this.postsService.findAllIndex( human, petId );
+  }
+
+  @Get( ':id' )
+  findOne(
+		@Param( 'id', ParseUUIDPipe ) id: string
+	) {
     return this.postsService.findOne( id );
   }
 
