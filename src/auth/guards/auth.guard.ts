@@ -35,6 +35,7 @@ export class AuthGuard implements CanActivate {
 			const human = await this.authService.validate( payload.id );
 
 			request['human'] = human;
+			request['token'] = token;
 		} catch {
 			throw new UnauthorizedException( 'Invalid token' );
 		}

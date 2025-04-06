@@ -152,8 +152,8 @@ model PetFriend {
 	isBlocked		Boolean	@default(false)
 	blockedAt   DateTime?
 
-	pet        	Pet      @relation("PetFriends", fields: [petId], references: [id])
-	friend      	Pet      @relation("FriendOf", fields: [friendId], references: [id])
+	pet       Pet @relation("PetFriends", fields: [petId], references: [id])
+	friend		Pet	@relation("FriendOf", fields: [friendId], references: [id])
 
 	@@index([isDeleted, isBlocked])
 	@@id([petId, friendId])
@@ -184,8 +184,8 @@ enum Gender {
 }
 
 enum Size {
-  SMALL
-  MEDIUM
-  LARGE
-  EXTRA_LARGE
+	SMALL
+	MEDIUM
+	LARGE
+	EXTRA_LARGE
 }
