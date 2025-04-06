@@ -9,6 +9,8 @@ import {
 	ParseUUIDPipe,
 	UseGuards
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiUnauthorizedResponse, ApiTags } from '@nestjs/swagger';
+
 
 import { AuthGuard } from '@auth/guards/auth.guard';
 import { CurrentHuman } from '@auth/decorators/current-human.decorator';
@@ -17,8 +19,10 @@ import { CreatePostDto } from '@posts/dto/create-post.dto';
 import { UpdatePostDto } from '@posts/dto/update-post.dto';
 import { HumanAuthDto } from '@humans/dto/user-auth.dto';
 
-@UseGuards( AuthGuard )
+@ApiTags('Posts') 
 @Controller('posts')
+@ApiBearerAuth('access-token')
+@UseGuards( AuthGuard )
 export class PostsController {
   constructor( private readonly postsService: PostsService ) {}
 
@@ -28,9 +32,11 @@ export class PostsController {
 		@Body() createPostDto: CreatePostDto
 	) {
     return this.postsService.create( petId, createPostDto );
-  }
+	}
 
   @Get('by-pet/:petId')
+ 	@ApiOkResponse({ description: 'List of posts' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   findAllByPet(
 		@CurrentHuman() human: HumanAuthDto,
 		@Param( 'petId', ParseUUIDPipe ) petId: string,
@@ -39,6 +45,8 @@ export class PostsController {
   }
 
 	@Get('index/:petId')
+	@ApiOkResponse({ description: 'List of posts' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   findAllIndex(
 		@CurrentHuman() human: HumanAuthDto,
 		@Param( 'petId', ParseUUIDPipe ) petId: string,
