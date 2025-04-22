@@ -1,33 +1,55 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Body,
+	Patch,
+	Delete,
+	UseGuards
+} from '@nestjs/common';
+import {
+	ApiBearerAuth,
+	ApiOkResponse,
+	ApiTags,
+	ApiUnauthorizedResponse
+} from '@nestjs/swagger';
 
-import { HumansService }  from '@humans/humans.service';
-import { CreateHumanDto }	from '@humans/dto/create-human.dto';
+import { AuthGuard } from '@auth/guards/auth.guard';
+import { HumansService } from '@humans/humans.service';
 import { UpdateHumanDto } from '@humans/dto/update-human.dto';
+import { CurrentHuman } from '@auth/decorators/current-human.decorator';
+import { HumanAuthDto } from './dto/user-auth.dto';
 
+@ApiTags('Humans')
 @Controller('humans')
+@ApiBearerAuth('access-token')
+@UseGuards( AuthGuard )
 export class HumansController {
 	constructor(private readonly humansService: HumansService) {}
 
-	@Get(':id')
-	findOne(
-		@Param( 'id', ParseUUIDPipe ) id: string
+	@Get()
+	@ApiOkResponse({ description: 'Human' })
+	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
+	findMyself(
+		@CurrentHuman() human: HumanAuthDto,
 	) {
-		return this.humansService.findOne( id );
+		return human;
 	}
 
-	@Patch(':id')
+	@Patch()
+	@ApiOkResponse({ description: 'Updated Human' })
+	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 	update(
-		@Param( 'id', ParseUUIDPipe ) id: string,
-		@Body() updateHumanDto: UpdateHumanDto
+		@Body() updateHumanDto: UpdateHumanDto,
+		@CurrentHuman() human: HumanAuthDto,
 	) {
-		return this.humansService.update( id, updateHumanDto );
+		return this.humansService.update( updateHumanDto, human );
 	}
 
-	@Delete(':id')
-	remove(
-		@Param( 'id', ParseUUIDPipe ) id: string
+	@Delete()
+	removeMyself(
+		@CurrentHuman() human: HumanAuthDto
 	) {
-		return this.humansService.remove( id );
+		return this.humansService.remove( human );
 	}
 
 }
