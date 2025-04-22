@@ -10,8 +10,8 @@ import {
 	IsOptional,
 	IsString,
 	IsUUID
-}											from 'class-validator';
-import { Transform }	from 'class-transformer';
+} from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreatePetDto {
 
