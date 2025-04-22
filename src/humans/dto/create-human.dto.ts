@@ -30,16 +30,6 @@ export class CreateHumanDto {
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({
-    example: 'securePassword123',
-    description: 'The password of the human',
-    minLength: 8,
-    maxLength: 100,
-  })
-  @IsString()
-  @IsNotEmpty()
-  @Length(8, 100)
-  password: string;
 
   @ApiProperty({
     example: 'John',
@@ -87,6 +77,6 @@ export class CreateHumanDto {
   })
   @IsEnum(Gender)
   @IsOptional()
-  sex?: Gender;
+  gender?: Gender;
 
 }
