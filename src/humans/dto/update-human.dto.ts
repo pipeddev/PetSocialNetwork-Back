@@ -1,12 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
 
-import { CreateHumanDto } 		from './create-human.dto';
-import { IsOptional, IsUUID } from 'class-validator';
+import { CreateHumanDto } from '@humans/dto/create-human.dto';
 
-export class UpdateHumanDto extends PartialType( CreateHumanDto ) {
 
-	@IsUUID()
-	@IsOptional()
-	id?: string;
-
-}
+export class UpdateHumanDto extends PartialType( CreateHumanDto ) {}
