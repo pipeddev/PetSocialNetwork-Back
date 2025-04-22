@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { Human, PrismaClient } from '@prisma/client';
 
-import { CreateHumanDto } from './dto/create-human.dto';
 import { UpdateHumanDto } from './dto/update-human.dto';
+import { HumanAuthDto } from './dto/user-auth.dto';
+import { PrismaException } from '@config/prisma-catch';
 
 @Injectable()
 export class HumansService extends PrismaClient implements OnModuleInit {
@@ -18,41 +19,25 @@ export class HumansService extends PrismaClient implements OnModuleInit {
 		return rest as UpdateHumanDto;
 	}
 
-	async #validHuman( human: CreateHumanDto | UpdateHumanDto ): Promise<void> {
-		const existHuman = await this.human
-		.findUnique({ where: {
-			username: human.username,
-			email		: human.email
-		}});
+	async update(
+		updateHumanDto: UpdateHumanDto,
+		currentHuman: HumanAuthDto,
+	): Promise<UpdateHumanDto> {
+		try {
+			const human = await this.human.update({
+				where: { id: currentHuman.id },
+				data: updateHumanDto
+			});
 
-		if ( existHuman ) throw new BadRequestException( `Human already exists` );
+			return this.#humanToHumanDto( human );
+		} catch (error) {
+			throw PrismaException.catch( error );
+		}
 	}
 
-	async findOne( id: string ): Promise<UpdateHumanDto> {
-		const human = await this.human.findUnique({ where: { id }});
+	async remove( currentHuman: HumanAuthDto ): Promise<UpdateHumanDto> {
+		await this.human.delete({ where: { id: currentHuman.id }});
 
-		if ( !human ) throw new NotFoundException( `Human not found` );
-
-		return this.#humanToHumanDto( human );
-	}
-
-	async update( id: string, updateHumanDto: UpdateHumanDto ): Promise<UpdateHumanDto> {
-		await this.findOne( id );
-		await this.#validHuman( updateHumanDto );
-
-		const human = await this.human.update({
-			where: { id },
-			data: updateHumanDto
-		});
-
-		return this.#humanToHumanDto( human );
-	}
-
-	async remove( id: string ): Promise<UpdateHumanDto> {
-		const human = await this.findOne( id );
-
-		await this.human.delete({ where: { id }});
-
-		return human;
+		return currentHuman;
 	}
 }
