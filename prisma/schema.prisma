@@ -56,16 +56,16 @@ model Post {
 
 // El humano solo será para el login, luego tiene que escoger el perfil del mascota que quiera ver
 model Human {
-	id          String   @id @default(uuid())
-	username    String   @unique
-	email       String   @unique
-	password    String
-	name        String?
-	avatar      String?
-	address     String?
-	phone       String?
-	sex         Gender?
-	pets        Pet[]
+	id        String   @id @default(uuid())
+	username  String   @unique
+	email     String   @unique
+	password  String
+	name      String?
+	avatar    String?
+	address		String?
+	phone			String?
+	gender		Gender?
+	pets			Pet[]
 
 	createdAt   DateTime @default(now())
 	updatedAt   DateTime @updatedAt
