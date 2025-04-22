@@ -26,22 +26,22 @@ import { HumanAuthDto } from '@humans/dto/user-auth.dto';
 export class PostsController {
 	constructor( private readonly postsService: PostsService ) {}
 
-	@Post()
+	@Post(':petId')
 	create(
 		@Param('petId', ParseUUIDPipe ) petId: string,
-		@Body() createPostDto: CreatePostDto
+		@Body() createPostDto: CreatePostDto,
+		@CurrentHuman() human: HumanAuthDto,
 	) {
-		return this.postsService.create( petId, createPostDto );
+		return this.postsService.create( petId, createPostDto, human );
 	}
 
 	@Get('by-pet/:petId')
 	@ApiOkResponse({ description: 'List of posts' })
 	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 	findAllByPet(
-		@CurrentHuman() human: HumanAuthDto,
 		@Param( 'petId', ParseUUIDPipe ) petId: string,
 	) {
-		return this.postsService.findAllByPet( human, petId );
+		return this.postsService.findAllByPet( petId );
 	}
 
 	@Get('index/:petId')
