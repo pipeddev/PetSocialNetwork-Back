@@ -36,7 +36,7 @@ export class PetsController {
 		return this.petsService.create( createPetDto, human );
 	}
 
-	@Get(':id')
+	@Get('/friends/:id')
 	findMyFriends(
 		@Param( 'id', ParseUUIDPipe ) id: string
 	) {
