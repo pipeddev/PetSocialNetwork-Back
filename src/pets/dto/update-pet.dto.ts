@@ -1,5 +1,5 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType, OmitType } from '@nestjs/swagger';
 
 import { CreatePetDto } from './create-pet.dto';
 
-export class UpdatePetDto extends PartialType( CreatePetDto ) {}
+export class UpdatePetDto extends PartialType( OmitType( CreatePetDto, ['humanId'] )) {}
