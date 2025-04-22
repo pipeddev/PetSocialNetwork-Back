@@ -27,8 +27,11 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 
 	async create(
 		petId: string,
-		createPostDto: CreatePostDto
+		createPostDto: CreatePostDto,
+		human: HumanAuthDto,
 	): Promise<Post> {
+		await this.#validPet( human, petId );
+
 		const post = await this.post.create({
 			data: {
 				...createPostDto,
@@ -41,13 +44,18 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 
 	// TODO: Agregar un paginador
 	async findAllByPet(
-		human: HumanAuthDto,
 		petId: string,
 	): Promise<Post[]> {
-		await this.#validPet( human, petId );
-
 		return this.post.findMany({
-			where: { petId: petId }
+			where: { petId: petId },
+			include: {
+				comments: {
+					take: -15,
+					orderBy: {
+						createdAt: 'desc',
+					},
+				},
+			},
 		});
 	}
 
@@ -62,23 +70,41 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 			select: {  friendId: true }
 		});
 
-		const friendIds = petFriends.map(( petFriend ) => petFriend.friendId );
-    const allPetIdsToQuery = [...friendIds, petId];
+		const friendIds					= petFriends.map(( petFriend ) => petFriend.friendId );
+		const allPetIdsToQuery	= [...friendIds, petId];
 
-    return this.post.findMany({
-      where: {
+		return this.post.findMany({
+			where: {
 				petId: {
-          in: allPetIdsToQuery
-        },
+					in: allPetIdsToQuery
+				},
 				createdAt: {
-          lte: new Date()
-        }
-			}
-    });
+					lte: new Date()
+				}
+			},
+			include: {
+				comments: {
+					take: -15,
+					orderBy: {
+						createdAt: 'desc',
+					},
+				},
+			},
+		});
   }
 
   async findOne( id: string ): Promise<Post> {
-    const post = await this.post.findUnique({ where: { id } });
+    const post = await this.post.findUnique({
+			where: { id },
+			include: {
+				comments: {
+					take: -15,
+					orderBy: {
+						createdAt: 'desc',
+					},
+				},
+			},
+		});
 
 		if ( !post ) {
 			throw new NotFoundException( 'Post not found' );
