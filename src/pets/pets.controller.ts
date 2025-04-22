@@ -6,15 +6,23 @@ import {
 	Patch,
 	Param,
 	Delete,
-	ParseUUIDPipe
+	ParseUUIDPipe,
+	UseGuards
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { PetsService }	from '@pets/pets.service';
 import { CreatePetDto } from '@pets/dto/create-pet.dto';
 import { UpdatePetDto } from '@pets/dto/update-pet.dto';
+import { AuthGuard } from '@auth/guards/auth.guard';
+import { CurrentHuman } from '@auth/decorators/current-human.decorator';
+import { HumanAuthDto } from '@humans/dto/user-auth.dto';
 
 
+@ApiTags('Pets')
 @Controller( 'pets' )
+@ApiBearerAuth('access-token')
+@UseGuards( AuthGuard )
 export class PetsController {
 	constructor(
 		private readonly petsService: PetsService
@@ -22,14 +30,17 @@ export class PetsController {
 
 	@Post()
 	create(
-		@Body() createPetDto: CreatePetDto
+		@Body() createPetDto: CreatePetDto,
+		@CurrentHuman() human: HumanAuthDto,
 	) {
-		return this.petsService.create( createPetDto );
+		return this.petsService.create( createPetDto, human );
 	}
 
-	@Get()
-	findAll() {
-		return this.petsService.findAll();
+	@Get(':id')
+	findMyFriends(
+		@Param( 'id', ParseUUIDPipe ) id: string
+	) {
+		return this.petsService.findMyFriends( id );
 	}
 
 	@Get(':id')
@@ -42,15 +53,17 @@ export class PetsController {
 	@Patch(':id')
 	update(
 		@Param('id', ParseUUIDPipe ) id: string,
-		@Body() updatePetDto: UpdatePetDto
+		@Body() updatePetDto: UpdatePetDto,
+		@CurrentHuman() human: HumanAuthDto,
 	) {
-		return this.petsService.update( id, updatePetDto );
+		return this.petsService.update( id, updatePetDto, human );
 	}
 
 	@Delete(':id')
 	remove(
-		@Param('id', ParseUUIDPipe) id: string
+		@Param('id', ParseUUIDPipe) id: string,
+		@CurrentHuman() human: HumanAuthDto,
 	) {
-		return this.petsService.remove( id );
+		return this.petsService.remove( id, human );
 	}
 }
