@@ -1,5 +1,5 @@
 import {
-	BadRequestException,
+	ForbiddenException,
 	Injectable,
 	Logger,
 	NotFoundException,
@@ -10,6 +10,8 @@ import { Pet, PrismaClient } from '@prisma/client';
 
 import { CreatePetDto } from '@pets/dto/create-pet.dto';
 import { UpdatePetDto } from '@pets/dto/update-pet.dto';
+import { HumanAuthDto } from '@humans/dto/user-auth.dto';
+import { PrismaException } from '@config/prisma-catch';
 
 
 @Injectable()
@@ -22,44 +24,47 @@ export class PetsService extends PrismaClient implements OnModuleInit {
 		this.#logger.log( '***Connected to DB***' );
 	}
 
-	async create( createPetDto: CreatePetDto ): Promise<Pet> {
-		const pet = await this.pet.findFirst({
-			where: { username: createPetDto.username },
-			select: { username: true }
-		});
+	async create(
+		createPetDto: CreatePetDto,
+		human: HumanAuthDto
+	): Promise<Pet> {
+		if ( createPetDto.humanId !== human.id ) {
+			throw new ForbiddenException( 'You do not have permits for this pet' );
+		}
 
-		if ( pet?.username ) throw new BadRequestException( `Pet with username ${ createPetDto.username } already exists` );
-
-		return await this.pet.create({
-			data: createPetDto
-		});
+		try {
+			return await this.pet.create({
+				data: createPetDto
+			});
+		} catch (error) {
+			throw PrismaException.catch( error );
+		}
 	}
 
-	async findAll(): Promise<Pet[]> {
-		return await this.pet.findMany({
-			where: { isDeleted: false },
-			include: {
+	extractFriends = ( entries : { friends : { friend: Pet }[] }[] ): Pet[] =>
+		entries.flatMap( entry => entry.friends.map( f => f.friend ) );
+
+	async findMyFriends( id: string ): Promise<Pet[]> {
+		await this.findOne( id );
+
+		const entries = await this.pet.findMany({
+			where  : { isDeleted: false, id },
+			select : {
 				friends: {
-					where: { isDeleted: false },
-					include: {
-						friend: true,
+					where : { isDeleted: false },
+					select: {
+						friend : true,
 					},
 				},
 			},
 		});
+
+		return this.extractFriends( entries );
 	}
 
 	async findOne( id: string ): Promise<Pet> {
-		const pet = await this.pet.findUnique({
+		const pet = await this.pet.findFirst({
 			where: { id, isDeleted: false },
-			include: {
-				friends: {
-					where: { isDeleted: false },
-					include: {
-						friend: true,
-					},
-				},
-			},
 		});
 
 		if ( !pet ) throw new NotFoundException( `Pet with id ${ id } not found` );
@@ -69,29 +74,38 @@ export class PetsService extends PrismaClient implements OnModuleInit {
 
 	async update(
 		id: string,
-		{ breedId, currencyId, humanId, ...rest }: UpdatePetDto
+		{ breedId, currencyId, ...rest }: UpdatePetDto,
+		human: HumanAuthDto
 	): Promise<Pet> {
 		const pet = await this.findOne( id );
 
-		if ( pet.username !== rest.username ) throw new BadRequestException( `Pet can't change the username` );
+		if ( pet.humanId !== human.id ) throw new ForbiddenException( 'You are not allowed to update this pet' );
 
-		return this.pet.update({
-      where: { id },
-      data: {
-				...rest,
-        ...(breedId && { breed: { connect: { id: breedId } } }),
-        ...(currencyId && { currency: { connect: { id: currencyId } } }),
-      },
-      include: {
-        breed: true,
-        friends: { include: { friend: true } },
-        currency: true
-      },
-    });
+		try {
+			return await this.pet.update({
+				where: { id },
+				data: {
+					...rest,
+					...(breedId && { breed: { connect: { id: breedId } } }),
+					...(currencyId && { currency: { connect: { id: currencyId } } }),
+				},
+				include: {
+					breed: true,
+					friends: { include: { friend: true } },
+					currency: true
+				},
+			});
+		} catch (error) {
+			throw PrismaException.catch( error, 'Pet' );
+		}
 	}
 
-	async remove( id: string ): Promise<Pet> {
+	async remove( id: string, human: HumanAuthDto ): Promise<Pet> {
 		const pet = await this.findOne( id );
+
+		if ( pet.humanId !== human.id ) {
+			throw new ForbiddenException( 'You are not allowed to delete this pet' );
+		}
 
 		await this.pet.update({
 			where: { id },
