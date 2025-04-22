@@ -1,6 +1,5 @@
 import {
 	Injectable,
-	InternalServerErrorException,
 	OnModuleInit,
 	UnauthorizedException
 } from '@nestjs/common';
@@ -12,6 +11,7 @@ import * as bcrypt from 'bcryptjs';
 import { SignUpDto } from '@auth/dto/signup.dto';
 import { SignInDto } from '@auth/dto/signin.dto';
 import { HumanResponseDto } from '@auth/dto/human-response.dto';
+import { PrismaException } from '@config/prisma-catch';
 import { HumanDto } from '@humans/dto/human.entity';
 import { HumanAuthDto } from '@humans/dto/user-auth.dto';
 
@@ -49,31 +49,31 @@ export class AuthService extends PrismaClient implements OnModuleInit {
         token: this.#generateJwtToken( human.id )
       };
     } catch ( error ) {
-			throw new InternalServerErrorException( 'Error creating user' );
+			throw PrismaException.catch( error );
     }
   }
 
-  async signIn( { password, email }: SignInDto ): Promise<HumanResponseDto> {
-    const human = await this.human.findUnique({ where: { email }});
+	async signIn( { password, email }: SignInDto ): Promise<HumanResponseDto> {
+		const human = await this.human.findUnique({ where: { email }});
 
-    if ( !human ) throw new UnauthorizedException( 'Credentials are not valid' );
-    if ( !bcrypt.compareSync( password, human.password ))
-      throw new UnauthorizedException( 'Credentials are not valid' );
+		if ( !human ) throw new UnauthorizedException( 'Credentials are not valid' );
+		if ( !bcrypt.compareSync( password, human.password ))
+			throw new UnauthorizedException( 'Credentials are not valid' );
 
 		const { password: pass, ...rest } = human;
 
-    return {
-      human: rest as unknown as HumanDto,
-      token: this.#generateJwtToken( human.id )
-    };
-  }
+		return {
+			human: rest as unknown as HumanDto,
+			token: this.#generateJwtToken( human.id )
+		};
+	}
 
 	async validate( humanId: string ) : Promise<HumanAuthDto> {
 		const human = await this.human.findUnique({ where: { id: humanId }});
 
 		if ( !human ) throw new UnauthorizedException( 'Unauthorized human.' );
 
-		const { password, ...rest } = human as HumanDto;
+		const { password, ...rest } = human;
 
 		return rest as HumanAuthDto;
 	}
