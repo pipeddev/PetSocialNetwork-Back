@@ -1,26 +1,99 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { ForbiddenException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+
+import { PrismaClient } from '@prisma/client';
+
+import { PrismaException }	from '@config/prisma-catch';
+import { CreateCommentDto } from '@comments/dto/create-comment.dto';
+import { UpdateCommentDto } from '@comments/dto/update-comment.dto';
+import { HumanAuthDto }			from '@humans/dto/user-auth.dto';
 
 @Injectable()
-export class CommentsService {
-  create(createCommentDto: CreateCommentDto) {
-    return 'This action adds a new comment';
+export class CommentsService extends PrismaClient implements OnModuleInit  {
+
+	onModuleInit() {
+		this.$connect();
+	}
+
+  async create(createCommentDto: CreateCommentDto) {
+		try {
+			return await this.comment.create({
+				data: createCommentDto
+			})
+		} catch (error) {
+			throw PrismaException.catch( error, 'Comments' );
+		}
   }
 
-  findAll() {
-    return `This action returns all comments`;
-  }
+	// TODO: Agregar paginación
+  async findCommentsByPost( postId: string ) {
+		return await this.comment.findMany({
+			where: {
+				postId,
+				parentCommentId: null,
+			},
+			include: {
+				replies: {
+					take		: -5,
+					orderBy	: {
+						createdAt: 'asc',
+					},
+				},
+			},
+		});
+	}
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
-  }
+	// TODO: Agregar paginación
+	async findRepliesByComments( commentId: string ) {
+		return await this.comment.findMany({
+			where: { parentCommentId: commentId }
+		});
+	}
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
-  }
+	async #validComment( commentId: string, human: HumanAuthDto ): Promise<void> {
+		const comment = await this.comment.findUnique({
+			select	: { petId: true },
+			where		: { id: commentId }
+		});
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
-  }
+		if ( !comment ) throw new NotFoundException( 'Comment not found' );
+
+		const pet = await this.pet.findUnique( {
+			select	: { humanId: true },
+			where		: { id: comment.petId }
+		});
+
+		if ( pet?.humanId !== human.id ) throw new ForbiddenException( 'Yout are not authorized' );
+	}
+
+  async update( 
+		id: string,
+		updateCommentDto: UpdateCommentDto,
+		human: HumanAuthDto
+	) {
+		await this.#validComment( id, human );
+
+		try {
+			return await this.comment.update({
+				where	: { id },
+				data	: { content: updateCommentDto.content },
+			});
+		} catch ( error ) {
+			throw PrismaException.catch( error, 'Comments' );
+		}
+	}
+
+  async remove(
+		id: string,
+		human: HumanAuthDto
+	) {
+		await this.#validComment( id, human );
+
+		try {
+			return await this.comment.delete({
+				where	: { id },
+			});
+		} catch ( error ) {
+			throw PrismaException.catch( error, 'Comments' );
+		}
+	}
 }
