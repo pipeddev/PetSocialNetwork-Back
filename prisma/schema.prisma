@@ -17,8 +17,6 @@ datasource db {
 model Comment {
 	id          		String   @id @default(uuid())
 	content     		String
-	isDeleted   		Boolean  @default(false)
-	deletedAt   		DateTime?
 
 	parentComment		Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
 	parentCommentId String?
