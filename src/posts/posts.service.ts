@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 
-import { Post, PrismaClient } from '@prisma/client';
+import { Post, Prisma, PrismaClient } from '@prisma/client';
 
 import { CreatePostDto } from '@posts/dto/create-post.dto';
 import { UpdatePostDto } from '@posts/dto/update-post.dto';
@@ -25,6 +25,29 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 		}
 	}
 
+	#includeCommentsAndReplies = (
+		commentsTake: number,
+		repliesTake: number
+	): Prisma.PostInclude => ({
+		comments: {
+			take	: commentsTake,
+			where	: {
+				parentCommentId: null,
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+			include: {
+				replies: {
+					take		: repliesTake,
+					orderBy	: {
+						createdAt: 'asc',
+					},
+				},
+			},
+		},
+	});
+
 	async create(
 		petId: string,
 		createPostDto: CreatePostDto,
@@ -48,17 +71,11 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 	): Promise<Post[]> {
 		return this.post.findMany({
 			where: { petId: petId },
-			include: {
-				comments: {
-					take: -15,
-					orderBy: {
-						createdAt: 'desc',
-					},
-				},
-			},
+			include	: this.#includeCommentsAndReplies( -10, -5 )
 		});
 	}
 
+	// TODO: Agregar un paginador
 	async findAllIndex(
 		human: HumanAuthDto,
 		petId: string,
@@ -66,8 +83,8 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 		await this.#validPet( human, petId );
 
 		const petFriends = await this.petFriend.findMany({
-			where: { petId },
-			select: {  friendId: true }
+			where		: { petId },
+			select	: {  friendId: true }
 		});
 
 		const friendIds					= petFriends.map(( petFriend ) => petFriend.friendId );
@@ -82,28 +99,15 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 					lte: new Date()
 				}
 			},
-			include: {
-				comments: {
-					take: -15,
-					orderBy: {
-						createdAt: 'desc',
-					},
-				},
-			},
+			include	: this.#includeCommentsAndReplies( -10, -5 )
 		});
   }
 
+	// TODO: Agregar un paginador
   async findOne( id: string ): Promise<Post> {
     const post = await this.post.findUnique({
-			where: { id },
-			include: {
-				comments: {
-					take: -15,
-					orderBy: {
-						createdAt: 'desc',
-					},
-				},
-			},
+			where		: { id },
+			include	: this.#includeCommentsAndReplies( -10, -5 )
 		});
 
 		if ( !post ) {
