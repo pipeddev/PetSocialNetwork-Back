@@ -5,6 +5,8 @@ import { Post, Prisma, PrismaClient } from '@prisma/client';
 import { CreatePostDto } from '@posts/dto/create-post.dto';
 import { UpdatePostDto } from '@posts/dto/update-post.dto';
 import { HumanAuthDto } from '@humans/dto/user-auth.dto';
+import { PaginationDto } from '@common/dtos/pagination';
+import { PaginationCommentsDto } from '@pets/dto/pagination/comments.dto';
 
 @Injectable()
 export class PostsService extends PrismaClient implements OnModuleInit {
@@ -26,8 +28,10 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 	}
 
 	#includeCommentsAndReplies = (
-		commentsTake: number,
-		repliesTake: number
+		commentsTake	: number,
+		repliesTake		: number,
+		orderComment	: 'asc' | 'desc',
+		orderReply		: 'asc' | 'desc'
 	): Prisma.PostInclude => ({
 		comments: {
 			take	: commentsTake,
@@ -35,13 +39,13 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 				parentCommentId: null,
 			},
 			orderBy: {
-				createdAt: 'desc',
+				createdAt: orderComment,
 			},
 			include: {
 				replies: {
 					take		: repliesTake,
 					orderBy	: {
-						createdAt: 'asc',
+						createdAt: orderReply,
 					},
 				},
 			},
@@ -65,21 +69,24 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 		return post;
 	}
 
-	// TODO: Agregar un paginador
 	async findAllByPet(
 		petId: string,
+		{ page, each, order, eachComment, eachReply, orderComment, orderReply }: PaginationCommentsDto
 	): Promise<Post[]> {
 		return this.post.findMany({
-			where: { petId: petId },
-			include	: this.#includeCommentsAndReplies( -10, -5 )
+			take    : each,
+			skip    : page * each,
+			orderBy : { createdAt: order },
+			where   : { petId: petId },
+			include	: this.#includeCommentsAndReplies(( eachComment * -1 ), ( eachReply * -1 ), orderComment, orderReply)
 		});
 	}
 
-	// TODO: Agregar un paginador
 	async findAllIndex(
-		human: HumanAuthDto,
-		petId: string,
-	): Promise<Post[]> {
+	human: HumanAuthDto,
+	petId: string,
+	{ page, each, order, eachComment, eachReply, orderComment, orderReply }: PaginationCommentsDto
+): Promise<Post[]> {
 		await this.#validPet( human, petId );
 
 		const petFriends = await this.petFriend.findMany({
@@ -91,6 +98,9 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 		const allPetIdsToQuery	= [...friendIds, petId];
 
 		return this.post.findMany({
+			take    : each,
+			skip    : page * each,
+			orderBy : { createdAt: order },
 			where: {
 				petId: {
 					in: allPetIdsToQuery
@@ -99,15 +109,18 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 					lte: new Date()
 				}
 			},
-			include	: this.#includeCommentsAndReplies( -10, -5 )
+			include	: this.#includeCommentsAndReplies(( eachComment * -1 ), ( eachReply * -1 ), orderComment, orderReply )
 		});
   }
 
-	// TODO: Agregar un paginador
-  async findOne( id: string ): Promise<Post> {
+  async findOne(
+		id: string,
+	{ eachComment, eachReply, orderComment, orderReply }: PaginationCommentsDto
+
+	): Promise<Post> {
     const post = await this.post.findUnique({
 			where		: { id },
-			include	: this.#includeCommentsAndReplies( -10, -5 )
+			include	: this.#includeCommentsAndReplies(( eachComment * -1 ), ( eachReply * -1 ), orderComment, orderReply )
 		});
 
 		if ( !post ) {
@@ -117,8 +130,8 @@ export class PostsService extends PrismaClient implements OnModuleInit {
 		return post;
   }
 
-  async update( id: string, updatePostDto: UpdatePostDto ): Promise<Post> {
-		await this.findOne(id);
+  async update( id: string, updatePostDto:UpdatePostDto ): Promise<Post> {
+		await this.findOne(id, { page: 1, each: 10, order: 'desc', eachComment: 10, eachReply: 5, orderComment: 'desc', orderReply: 'asc' });
 
 		const updatedPost = await this.post.update({
 			where: { id },
@@ -129,7 +142,7 @@ export class PostsService extends PrismaClient implements OnModuleInit {
   }
 
   async remove( id: string ): Promise<Post> {
-		await this.findOne(id);
+		await this.findOne(id, { page: 1, each: 10, order: 'desc', eachComment: 10, eachReply: 5, orderComment: 'desc', orderReply: 'asc' });
 
 		const deletedPost = await this.post.delete({ where: { id } });
 
