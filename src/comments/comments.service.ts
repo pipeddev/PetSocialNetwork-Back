@@ -6,7 +6,7 @@ import { PrismaException }				from '@config/prisma-catch';
 import { CreateCommentDto } 			from '@comments/dto/create-comment.dto';
 import { UpdateCommentDto } 			from '@comments/dto/update-comment.dto';
 import { PaginationDto }					from '@common/dtos/pagination';
-import { CommentResponse }					from '@comments/comment/comment';
+import { CommentResponse }					from '@comments/response/comment';
 import { HumanAuthDto }						from '@humans/dto/user-auth.dto';
 import { PaginationCommentsDto }	from '@pets/dto/pagination/comments.dto';
 
