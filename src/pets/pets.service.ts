@@ -8,10 +8,12 @@ import {
 
 import { Pet, PrismaClient } from '@prisma/client';
 
+import { PaginationDto } from '@common/dtos/pagination';
+import { PrismaException } from '@config/prisma-catch';
 import { CreatePetDto } from '@pets/dto/create-pet.dto';
 import { UpdatePetDto } from '@pets/dto/update-pet.dto';
 import { HumanAuthDto } from '@humans/dto/user-auth.dto';
-import { PrismaException } from '@config/prisma-catch';
+import { PetFriendDto } from './dto/pet-friends.dto';
 
 
 @Injectable()
@@ -44,22 +46,25 @@ export class PetsService extends PrismaClient implements OnModuleInit {
 	extractFriends = ( entries : { friends : { friend: Pet }[] }[] ): Pet[] =>
 		entries.flatMap( entry => entry.friends.map( f => f.friend ) );
 
-	async findMyFriends( id: string ): Promise<Pet[]> {
+	async findMyFriends(
+		id: string,
+		{ page, each, order }: PaginationDto
+  ): Promise<PetFriendDto[]> {
 		await this.findOne( id );
 
-		const entries = await this.pet.findMany({
-			where  : { isDeleted: false, id },
+		return await this.petFriend.findMany({
+			take    : each,
+			skip    : page * each,
+			orderBy : { createdAt: order },
+			where   : { isDeleted: false, petId: id },
 			select : {
-				friends: {
-					where : { isDeleted: false },
-					select: {
-						friend : true,
-					},
-				},
-			},
+				friend: true,
+				isBlocked: true,
+				isDeleted: true,
+				createdAt: true,
+				blockedAt: true
+			}
 		});
-
-		return this.extractFriends( entries );
 	}
 
 	async findOne( id: string ): Promise<Pet> {
