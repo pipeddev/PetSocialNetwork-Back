@@ -19,7 +19,8 @@
 			"@comments/*"   : ["src/comments/*"],
 			"@humans/*"     : ["src/humans/*"],
 			"@posts/*"      : ["src/posts/*"],
-			"@config/*"     : ["src/config/*"]
+			"@config/*"     : ["src/config/*"],
+            "@common/*"     : ["src/common/*"]
 		},
     "incremental": true,
     "skipLibCheck": true,
