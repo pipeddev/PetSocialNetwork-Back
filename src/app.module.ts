@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { AppController }    from './app.controller';
 import { PetsModule }       from '@pets/pets.module';
+import { CommonModule }     from '@common/common.module';
 import { SpeciesModule }    from '@species/species.module';
 import { BreedsModule }    	from '@breeds/breeds.module';
 import { CurrenciesModule } from '@currencies/currencies.module';
@@ -11,8 +12,9 @@ import { CommentsModule }   from '@comments/comments.module';
 import { AuthModule }       from '@auth/auth.module';
 
 @Module({
-  imports       : [
+	imports       : [
 		PetsModule,
+		CommonModule,
 		SpeciesModule,
 		BreedsModule,
 		CurrenciesModule,
