@@ -6,7 +6,7 @@ import { PrismaException }				from '@config/prisma-catch';
 import { CreateCommentDto } 			from '@comments/dto/create-comment.dto';
 import { UpdateCommentDto } 			from '@comments/dto/update-comment.dto';
 import { PaginationDto }					from '@common/dtos/pagination';
-import { CommentEntity }					from '@comments/comment/comment';
+import { CommentResponse }					from '@comments/comment/comment';
 import { HumanAuthDto }						from '@humans/dto/user-auth.dto';
 import { PaginationCommentsDto }	from '@pets/dto/pagination/comments.dto';
 
@@ -17,11 +17,11 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
 		this.$connect();
 	}
 
-	async create(createCommentDto: CreateCommentDto): Promise<CommentEntity> {
+	async create(createCommentDto: CreateCommentDto): Promise<CommentResponse> {
 		try {
 			return await this.comment.create({
 				data: createCommentDto
-			}) as CommentEntity;
+			}) as CommentResponse;
 		} catch (error) {
 			throw PrismaException.catch( error, 'Comments' );
 		}
@@ -30,7 +30,7 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
 	async findCommentsByPost(
 		postId: string,
 		{ page, each, order, eachReply, orderReply }: PaginationCommentsDto
-	): Promise<CommentEntity[]> {
+	): Promise<CommentResponse[]> {
 		return await this.comment.findMany({
 			take    : each,
 			skip    : page * each,
@@ -47,19 +47,19 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
 					},
 				},
 			},
-		}) as CommentEntity[];
+		}) as CommentResponse[];
 	}
 
 	async findRepliesByComments(
 		commentId: string,
 		{ page, each, order }: PaginationDto
-	): Promise<CommentEntity[]> {
+	): Promise<CommentResponse[]> {
 		return await this.comment.findMany({
 			take		: each,
 			skip		: page * each,
 			orderBy	: { createdAt: order },
 			where		: { parentCommentId: commentId }
-		}) as CommentEntity[];
+		}) as CommentResponse[];
 	}
 
 	async #validComment( commentId: string, human: HumanAuthDto ): Promise<void> {
@@ -82,14 +82,14 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
 		id: string,
 		updateCommentDto: UpdateCommentDto,
 		human: HumanAuthDto
-	): Promise<CommentEntity> {
+	): Promise<CommentResponse> {
 		await this.#validComment( id, human );
 
 		try {
 			return await this.comment.update({
 				where	: { id },
 				data	: { content: updateCommentDto.content },
-			}) as CommentEntity;
+			}) as CommentResponse;
 		} catch ( error ) {
 			throw PrismaException.catch( error, 'Comments' );
 		}
@@ -98,13 +98,13 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
   async remove(
 		id: string,
 		human: HumanAuthDto
-	): Promise<CommentEntity> {
+	): Promise<CommentResponse> {
 		await this.#validComment( id, human );
 
 		try {
 			return await this.comment.delete({
 				where	: { id },
-			}) as CommentEntity;
+			}) as CommentResponse;
 		} catch ( error ) {
 			throw PrismaException.catch( error, 'Comments' );
 		}
