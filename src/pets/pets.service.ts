@@ -13,7 +13,7 @@ import { PrismaException } from '@config/prisma-catch';
 import { CreatePetDto } from '@pets/dto/create-pet.dto';
 import { UpdatePetDto } from '@pets/dto/update-pet.dto';
 import { HumanAuthDto } from '@humans/dto/user-auth.dto';
-import { PetFriendDto } from './dto/pet-friends.dto';
+import { PetFriendResponse } from './dto/pet-friends.dto';
 
 
 @Injectable()
@@ -49,7 +49,7 @@ export class PetsService extends PrismaClient implements OnModuleInit {
 	async findMyFriends(
 		id: string,
 		{ page, each, order }: PaginationDto
-  ): Promise<PetFriendDto[]> {
+  ): Promise<PetFriendResponse[]> {
 		await this.findOne( id );
 
 		return await this.petFriend.findMany({
