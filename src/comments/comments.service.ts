@@ -2,10 +2,13 @@ import { ForbiddenException, Injectable, NotFoundException, OnModuleInit } from 
 
 import { PrismaClient } from '@prisma/client';
 
-import { PrismaException }	from '@config/prisma-catch';
-import { CreateCommentDto } from '@comments/dto/create-comment.dto';
-import { UpdateCommentDto } from '@comments/dto/update-comment.dto';
-import { HumanAuthDto }			from '@humans/dto/user-auth.dto';
+import { PrismaException }				from '@config/prisma-catch';
+import { CreateCommentDto } 			from '@comments/dto/create-comment.dto';
+import { UpdateCommentDto } 			from '@comments/dto/update-comment.dto';
+import { PaginationDto }					from '@common/dtos/pagination';
+import { CommentEntity }					from '@comments/comment/comment';
+import { HumanAuthDto }						from '@humans/dto/user-auth.dto';
+import { PaginationCommentsDto }	from '@pets/dto/pagination/comments.dto';
 
 @Injectable()
 export class CommentsService extends PrismaClient implements OnModuleInit  {
@@ -14,39 +17,49 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
 		this.$connect();
 	}
 
-  async create(createCommentDto: CreateCommentDto) {
+	async create(createCommentDto: CreateCommentDto): Promise<CommentEntity> {
 		try {
 			return await this.comment.create({
 				data: createCommentDto
-			})
+			}) as CommentEntity;
 		} catch (error) {
 			throw PrismaException.catch( error, 'Comments' );
 		}
-  }
+	}
 
-	// TODO: Agregar paginación
-  async findCommentsByPost( postId: string ) {
+	async findCommentsByPost(
+		postId: string,
+		{ page, each, order, eachReply, orderReply }: PaginationCommentsDto
+	): Promise<CommentEntity[]> {
 		return await this.comment.findMany({
+			take    : each,
+			skip    : page * each,
+			orderBy : { createdAt: order },
 			where: {
 				postId,
 				parentCommentId: null,
 			},
 			include: {
 				replies: {
-					take		: -5,
+					take		:(eachReply * -1 ),
 					orderBy	: {
-						createdAt: 'asc',
+						createdAt: orderReply,
 					},
 				},
 			},
-		});
+		}) as CommentEntity[];
 	}
 
-	// TODO: Agregar paginación
-	async findRepliesByComments( commentId: string ) {
+	async findRepliesByComments(
+		commentId: string,
+		{ page, each, order }: PaginationDto
+	): Promise<CommentEntity[]> {
 		return await this.comment.findMany({
-			where: { parentCommentId: commentId }
-		});
+			take		: each,
+			skip		: page * each,
+			orderBy	: { createdAt: order },
+			where		: { parentCommentId: commentId }
+		}) as CommentEntity[];
 	}
 
 	async #validComment( commentId: string, human: HumanAuthDto ): Promise<void> {
@@ -69,14 +82,14 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
 		id: string,
 		updateCommentDto: UpdateCommentDto,
 		human: HumanAuthDto
-	) {
+	): Promise<CommentEntity> {
 		await this.#validComment( id, human );
 
 		try {
 			return await this.comment.update({
 				where	: { id },
 				data	: { content: updateCommentDto.content },
-			});
+			}) as CommentEntity;
 		} catch ( error ) {
 			throw PrismaException.catch( error, 'Comments' );
 		}
@@ -85,13 +98,13 @@ export class CommentsService extends PrismaClient implements OnModuleInit  {
   async remove(
 		id: string,
 		human: HumanAuthDto
-	) {
+	): Promise<CommentEntity> {
 		await this.#validComment( id, human );
 
 		try {
 			return await this.comment.delete({
 				where	: { id },
-			});
+			}) as CommentEntity;
 		} catch ( error ) {
 			throw PrismaException.catch( error, 'Comments' );
 		}
