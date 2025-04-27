@@ -7,9 +7,10 @@ import {
 	Param,
 	Delete,
 	ParseUUIDPipe,
-	UseGuards
+	UseGuards,
+	Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 import { PetsService }	from '@pets/pets.service';
 import { CreatePetDto } from '@pets/dto/create-pet.dto';
@@ -17,6 +18,8 @@ import { UpdatePetDto } from '@pets/dto/update-pet.dto';
 import { AuthGuard } from '@auth/guards/auth.guard';
 import { CurrentHuman } from '@auth/decorators/current-human.decorator';
 import { HumanAuthDto } from '@humans/dto/user-auth.dto';
+import { PaginationDto } from '@common/dtos/pagination';
+import { PaginationDoc } from '@common/dtos/pagination-doc';
 
 
 @ApiTags('Pets')
@@ -37,10 +40,16 @@ export class PetsController {
 	}
 
 	@Get('/friends/:id')
+	@ApiQuery(PaginationDoc.PAGE)
+	@ApiQuery(PaginationDoc.EACH)
+	@ApiQuery(PaginationDoc.ORDER)
+	@ApiOkResponse({ description: 'List of friends' })
+	@ApiUnauthorizedResponse({ description: 'Unauthorized' })
 	findMyFriends(
+		@Query() pagination: PaginationDto,
 		@Param( 'id', ParseUUIDPipe ) id: string
 	) {
-		return this.petsService.findMyFriends( id );
+		return this.petsService.findMyFriends( id, pagination );
 	}
 
 	@Get(':id')
