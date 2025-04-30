@@ -6,6 +6,7 @@ import { CommonModule }     from '@common/common.module';
 import { SpeciesModule }    from '@species/species.module';
 import { BreedsModule }    	from '@breeds/breeds.module';
 import { CurrenciesModule } from '@currencies/currencies.module';
+import { CareTipsModule } from './care-tips/care-tips.module';
 import { HumansModule }     from '@humans/humans.module';
 import { PostsModule }      from '@posts/posts.module';
 import { CommentsModule }   from '@comments/comments.module';
@@ -21,7 +22,8 @@ import { AuthModule }       from '@auth/auth.module';
 		HumansModule,
 		PostsModule,
 		CommentsModule,
-		AuthModule
+		AuthModule,
+		CareTipsModule
 	],
   controllers   : [AppController],
   providers     : [],

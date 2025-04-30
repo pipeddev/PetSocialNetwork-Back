@@ -175,6 +175,17 @@ model Currency {
 	pets              Pet[]     @relation("PetCurrency")
 }
 
+model CareTip {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  type        Type
+  tips        String[] 
+  media_url   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 
 enum Gender {
   MALE
@@ -186,4 +197,10 @@ enum Size {
 	MEDIUM
 	LARGE
 	EXTRA_LARGE
+}
+
+enum Type {
+	BASIC_CARE
+	HEALTH
+	TRAINING
 }
