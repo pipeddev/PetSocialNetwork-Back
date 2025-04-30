@@ -22,6 +22,7 @@ export class CreateCareTipsDto {
     example: 'Debe usar un shampoo especial para perros',
   })
   @IsString()
+  @IsNotEmpty({ message: 'Description is required' })
   description: string;
 
   @ApiProperty({
